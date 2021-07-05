@@ -1,0 +1,53 @@
+// Gaucoin Ico
+
+pragma solidity ^0.4.11;
+
+contract gaucoin_ico{
+    // max gaucoin
+    uint public max_gau_coins = 1000000;
+    
+    // Conversion rate 1inr = 1000gau_coin
+    uint public inr_to_gaucoins = 1000;
+    
+    // total gaucoins bought
+    uint public total_gaucoins = 0;
+    
+    // Mapping from investor address to its equity in gaucoins and USD
+    mapping(address => uint) equity_gaucoins;
+    mapping(address => uint) equity_inr;
+    
+    // checking if investor can buy
+    modifier can_buy_gaucoins(uint inr_invested ){
+        require(inr_invested*inr_to_gaucoins+total_gaucoins < max_gau_coins);
+        _;
+    }
+    
+    // Getting the equity in gaucoins of an investor
+    function equity_in_gauoins(address investor)external constant returns(uint){
+        return equity_gaucoins[investor];
+    }
+    
+    // Getting the equity in INR of an investor
+    function equity_in_inr(address investor)external constant returns(uint){
+        return equity_inr[investor];
+    }
+    
+    
+    // Buying gaucoins
+    function buy_gaucoin(address investor, uint inr_invested)external 
+    can_buy_gaucoins(inr_invested){
+        uint gaucoins_bought = inr_invested * inr_to_gaucoins;
+        equity_gaucoins[investor] += gaucoins_bought;
+        equity_inr[investor] =  equity_gaucoins[investor] / 1000;
+        total_gaucoins += gaucoins_bought;
+    }
+    
+    // Selling gaucoins
+    function sell_gaucoins(address investor, uint gaucoins_to_sell)external{
+        equity_gaucoins[investor] -= gaucoins_to_sell;
+        equity_inr[investor] =  equity_gaucoins[investor] / 1000;
+        total_gaucoins -= gaucoins_to_sell;
+    }
+    
+    
+}
